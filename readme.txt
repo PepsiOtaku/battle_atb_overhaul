@@ -1,0 +1,156 @@
+========================================================================
+ATB OVERHAUL (formerly Advanced Faster ATB 2) v1.0
+For RPG Maker 2003 with DynRPG v0.20 or higher
+By PepsiOtaku
+========================================================================
+
+This patch allows you to control the speed calculations of party members and monsters independently, in turn controlling the speed of ATB bar.  It uses the formula:
+
+************************************
+Base ATB Speed + (( AddValue * Agility ) * SpeedVar)
+************************************
+
+The maximum value the ATB Speed can be is 30000, which will trigger the battler's next action. The AddValue
+is a hard-coded number you set within the DynRPG.ini file. 125 is the recommnded value, but you can 
+decrease/increase this value to your desired result. The SpeedVar is a multiplier that you can set via variable from within RPG Maker. 
+
+The formula gets calculated a few times a second, so if you set your AddValue to 125 & the SpeedVar to 12, while the agility is 20 (multiplying to 30000) you would get an instantaneous ATB bar (which also makes things a little easy) forcing each party member's action. The lower the AddValue, the higher your SpeedVar value needs to be. 
+
+While you can't technically "stop" the ATB bar using that formula, you can set the SpeedVar to a negative value in RPG maker, which would make the ATB bar go backwards in game until it hits 0 and remains there until the SpeedVar is changed again.
+
+
+What's NEW:
+
+* Fixed all of the timing issues. The ATB bars no longer moves at inappropriate times.
+
+* Now has a TRUE active/wait system. In Wait mode, nobody makes a move until you've completed your action. This also prevents any skill cancelling I believe. In active mode, the ATB bar moves when an action is being taken, but at a slower rate (75%) than it does normally
+
+* Added a character's agility into my formula, giving Agility more of an impact. You can also use turn this off and use the old formula (same thing minus agility).
+
+AddValue is set in the ini, while SpeedVar is a multiplier set in-game. Previously, the AddValue could be pretty high (2500) but now that you have to account for agility, you need to set it to an appropriate amount (I set it to 125 since my game uses agilities between around 10-30. If you set the SpeedVar to a negative variable, the ATB bar will go backwards to 0. Setting the AddValue to 1 would basically give you complete control in-game.
+
+* You can control the ATB bar of any battler via variable. This requires 14 variables (2 for the "Master" variables, 4 heroes and 8 monsters).
+
+* You can add condition exceptions (like with Corti's plugin)
+
+* You can set Active/Wait via switch (Moved from this plugin)
+
+* Comment commands: init_hero_speed, init_monster_speed, condition_speed_check
+		
+* v1.0: Added "FreezeSwitch" which will freeze all actions when turned on. You MUST turn this off again when you are done.
+
+* v1.0: Added "WaitSpeed" which will set the Wait speed to a value, similar to "ActiveSpeed."
+
+Installation
+-------------
+
+To install the plugin, make sure that you have patched your project with cherry's DynRPG patch which
+can be found here: 
+http://share.cherrytree.at/showfile-12494/dynrpg.rar (Link for v0.20)
+http://cherrytree.at/dynrpg
+
+1. Copy the "faster_atb_advanced.dll"into the DynPlugins folder of your own project.
+
+2. Add the following (between the asterisks) to your DynRPG.ini 
+
+**********************************************
+
+[battle_atb_overhaul]
+; Switch ON = Active, Switch OFF = Wait
+ATBmodeSwitch=4004
+; ...Base ATB Speed + ((AddValue * Agility) * SpeedVar)...
+; Default = 150
+AddValue=150
+; Set MultiplyAgility to false to change the formula to ...Base ATB Speed + (AddValue * SpeedVar)...
+MultiplyAgility=true
+; Master Variaibles. The 12 variables starting with BattlerStartVar get set to these
+HeroSpeedMasterVar=4001
+MonsterSpeedMasterVar=4015
+; Heroes Require 4 vars: BattlerStartVar+0,+1,+2,+3
+; Monsters Requires 8 vars: BattlerStartVar+4,+5,+6,+7,+8,+9,+10,+11
+BattlerStartVar=4041
+; Default multiplier values
+DefaultHeroSpeed=3
+DefaultMonsterSpeed=3
+; ActiveSpeed default=75. 100 is RM2k3's default speed, so it's recommended to set less 
+; Setting to 0 would always force WAIT mode.
+; WaitSpeed default=0. Set to the same value as ActiveSpeed to force ACTIVE mode.
+ActiveSpeed=75
+WaitSpeed=75
+; Switch that will freeze the ATB bars if turned on
+confFreezeSwitch=4048
+; Add condition exceptions here, separated by commas (ex: CondtionException=7,8,12,13)
+; This will prevent the atb bar from moving while a condition has "No Action Allowed"
+; When a party member becomes afflicted with one of these, their ATB bar will be reset to 0 (as it's frozen)
+; This was kind of a bug in Rm2k3. You could have a full ATB bar, but not be able to act, which didn't make sense
+ConditionExceptions=7,8,12,13
+
+**********************************************
+
+3. Set ATBmodeSwitch to the switch value of your choice to change the ATB mode by switch. Switch ON = Active, Switch OFF = Wait
+
+4. AddValue is for speed calculations (See top paragraphs). This can be set to any value between 0 and 30000,
+   but you must figure out how this would affect the ATB formula.
+   
+5. Set MultiplyAgility to false to change the formula to ...Base ATB Speed + (AddValue * SpeedVar)...
+
+6. Change HeroSpeedMasterVar "4001" to the Variable ID of your choice. This variable controls the Master Speed multiplier
+   For party members.
+
+7. Change MonsterSpeedMasterVar "4015" to the Variable ID of your choice. This variable controls the Master Speed multiplier
+   For monsters
+
+8. Change BattlerStartVar "4041" to the Variable ID of your choice. 12 variables starting from here will be used for the 
+   ATB speed multipliers of individual battlers. The first 4 will be for battlers (4041-4044) while the last 8 will be
+   used for monsters (4045-4052)
+
+7. Change DefaultHeroSpeed  & DefaultMonsterSpeed to the default multiplier value of your choice. I use "3" but you can change this
+   to Whichever multiplier works best for you. 
+   NOTE: "0" would override the whole formula, and use RM2k3's default ATB speed if you wish to do so
+   
+8. Set "ActiveSpeed" to a value less than or equal to 100 (100 is rm23k's default speed). This will change the overall speed
+
+9. Set ConditionExceptions to the condition IDs that are set to "No Action Allowed", separated by commas 
+   (ex: CondtionException=7,8,12,13). When a party member becomes afflicted with one of these, their ATB bar will be reset 
+   to 0 (as it's frozen) and will not increment whatsoever. This was kind of a bug in Rm2k3. You could have a full ATB bar, 
+   but not be able to act, which didn't make sense...
+
+
+Instructions
+-------------
+This plugin takes three commands:
+	@init_hero_speed: 
+	    Sets the 4 hero variables to the value of the Master Hero Variable
+	
+	@init_monster_speed: 
+	    Sets the 8 hero variables to the value of the Master Hero Variable 
+	    (regardless of how many monsters there 	are, since it doesn't matter)
+		
+	@condition_speed_check par1, par2, par3, optionalText
+	    Using the technique documented below, this will check for a specific condition (par1) and if a hero/monst has that condition, their speed will be altered to hero's value (par2) & monster's value (par3) respectively, you can add text after the 3rd parameter for easy reference to the condition you're checking for. (example: @condition_speed_check 5, 10, 10, BERSERK) would set the hero's SpeedVar & monster's SpeedVar to 10 if they have condition 5 (Berserk in my case).
+
+TO ADD EASY-TO-MANAGE SPEED INITIALIZATION & CONDITION CHECKING:
+1. Create 2 additional variables (from the 14 requires by this plugin), call them something like "CondSpeed-Hero" and "CondSpeed-Monster"
+
+2. Create a new Common Event called BATTLE-CondSpeeds (can be anything) & add the following (in this order):
+   <>Comment: @init_hero_speed
+   <>Comment: @init_monster_speed
+   <>Comment: 
+   <>Comment: ***LOWER PRIORITY CONDITIONS FIRST***
+   ------ 
+   <>Variable Oper: [CondSpeed-Hero] Set, Var [HeroSpeedMasterVar]'s Value
+   <>Variable Oper: [CondSpeed-Hero] * #			This can be any operation. Multiply by a negative number to make the atb bar go slower.
+   <>Variable Oper: [CondSpeed-Monster] Set, Var [MonsterSpeedMasterVar]'s Value
+   <>Variable Oper: [CondSpeed-Monster] * #
+   <>Comment: @condition_speed_check 3, V###1, V###2, CONDITION		Where V###1 = CondSpeed-Hero & V###2 = CondSpeed-Monster
+   -------
+   Repeat the 5 lines above for each condition, with lower priorities first, and higher priorities 2nd.
+
+3. In your Monster Groups, create two new pages with the following:
+   TRIGGER: Turns Elapsed [0]
+   <>Call Common Event: BATTLE-CondSpeeds
+   
+   TRIGGER: Turns Elapsed [1x+1]
+   <>Call Common Event: BATTLE-CondSpeeds
+   
+4. Copy & Paste that page into all of your battle events. This will run that common event at the start of every turn (it's very frequent) and set speeds accordingly. If you need to make changes from there, you'll need to edit that common event or develop your own technique!
