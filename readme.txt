@@ -76,7 +76,7 @@ DefaultMonsterSpeed=3
 ; Setting to 0 would always force WAIT mode.
 ; WaitSpeed default=0. Set to the same value as ActiveSpeed to force ACTIVE mode.
 ActiveSpeed=75
-WaitSpeed=75
+WaitSpeed=0
 ; Switch that will freeze the ATB bars if turned on
 confFreezeSwitch=4048
 ; Add condition exceptions here, separated by commas (ex: CondtionException=7,8,12,13)
@@ -110,7 +110,9 @@ ConditionExceptions=7,8,12,13
    
 8. Set "ActiveSpeed" to a value less than or equal to 100 (100 is rm23k's default speed). This will change the overall speed
 
-9. Set ConditionExceptions to the condition IDs that are set to "No Action Allowed", separated by commas 
+10. Set "WaitSpeed" to a value other than 0 if desired.
+
+10. Set ConditionExceptions to the condition IDs that are set to "No Action Allowed", separated by commas 
    (ex: CondtionException=7,8,12,13). When a party member becomes afflicted with one of these, their ATB bar will be reset 
    to 0 (as it's frozen) and will not increment whatsoever. This was kind of a bug in Rm2k3. You could have a full ATB bar, 
    but not be able to act, which didn't make sense...
@@ -128,6 +130,12 @@ This plugin takes three commands:
 		
 	@condition_speed_check par1, par2, par3, optionalText
 	    Using the technique documented below, this will check for a specific condition (par1) and if a hero/monst has that condition, their speed will be altered to hero's value (par2) & monster's value (par3) respectively, you can add text after the 3rd parameter for easy reference to the condition you're checking for. (example: @condition_speed_check 5, 10, 10, BERSERK) would set the hero's SpeedVar & monster's SpeedVar to 10 if they have condition 5 (Berserk in my case).
+		
+	@halt_atb:
+		If in Wait mode, sets ATB to value of WaitSpeed in DynRPG.ini. If in Active mode, sets ATB to ActiveSpeed. This allows you to pause the ATB for custom skill events.
+		
+	@resume_atb:
+		If the ATB is halted via "halt_atb," this resumes it to its default of "100."
 
 TO ADD EASY-TO-MANAGE SPEED INITIALIZATION & CONDITION CHECKING:
 1. Create 2 additional variables (from the 14 requires by this plugin), call them something like "CondSpeed-Hero" and "CondSpeed-Monster"

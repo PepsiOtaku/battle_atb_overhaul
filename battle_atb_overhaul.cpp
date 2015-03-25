@@ -1,11 +1,12 @@
 // ATB Overhaul
 // by PepsiOtaku
-// Version 1.0
+// Version 1.2
 
 #include <DynRPG/DynRPG.h>
-#define NOT_MAIN_MODULE
 #include <vector>
-#include <sstream>
+
+#define ATB_PARTY RPG::Actor::partyMember(i)->atbValue
+#define ATB_MON RPG::monsters[i]->atbValue
 
 std::map<std::string, std::string> configuration;
 
@@ -98,7 +99,7 @@ void resumeAtb(){
 
 void onFrame (RPG::Scene scene){
     if (scene == RPG::SCENE_BATTLE
-        && !atbWait && !monsterAction) // do not do the following if the ATB bar is set to 0 or a monster is performing an action
+        && !atbWait) // do not do the following if the ATB bar is set to 0 or a monster is performing an action
     {
         frameTimer++;
         if (frameTimer > 10)
@@ -106,69 +107,77 @@ void onFrame (RPG::Scene scene){
             frameTimer = 0;
             for (int i=0; i<8; i++)
             {
-                for (unsigned int j=0; j<exceptionVect.size(); j++)
-                {
-                    if (RPG::Actor::partyMember(i) != NULL
-                        && RPG::Actor::partyMember(i)->conditions[exceptionVect[j]] != 0)
-                    {
-                        RPG::Actor::partyMember(i)->atbValue = 0;
-                        condCheckFail = true;
-                        break;
-                    } else condCheckFail = false;
-                }
                 // Heroes
-                if (RPG::Actor::partyMember(i) != NULL && i<4 && condCheckFail == false
-                    // The ATB bar shouldn't move in these situations...
-                    && ((RPG::Actor::partyMember(i)->conditions[1] == 0 // ... the hero is not dead
-                    && RPG::Actor::partyMember(i)->actionStatus == RPG::AS_IDLE // ... the hero is idle
-                    && RPG::Actor::partyMember(i)->animationId != 14) // ... the hero has won the battle
-                    // 14 is the animation id for battle won for whatever reason-- should be 11
-                    && RPG::switches[confFreezeSwitch] == false // Other plugins need a means of freezing battle
-                    ))
-                {
-                    if (RPG::Actor::partyMember(i)->atbValue < 300000)
-                        if (confAgilMult == true)
-                            RPG::Actor::partyMember(i)->atbValue = RPG::Actor::partyMember(i)->atbValue + ((confAddValue*RPG::Actor::partyMember(i)->getAgility())*RPG::variables[confBattlerStartVar+i]);
-                        else RPG::Actor::partyMember(i)->atbValue = RPG::Actor::partyMember(i)->atbValue + (confAddValue*RPG::variables[confBattlerStartVar+i]);
-                    else RPG::Actor::partyMember(i)->atbValue = 300000;
-                    if (RPG::Actor::partyMember(i)->atbValue < 0)
-                        RPG::Actor::partyMember(i)->atbValue = 0;
-                }
-                for (unsigned int j=0; j<exceptionVect.size(); j++)
-                {
-                    if (RPG::monsters[i] != NULL
-                        && RPG::monsters[i]->conditions[exceptionVect[j]] != 0)
+                if (i<4 && RPG::Actor::partyMember(i)) {
+                    for (unsigned int j=0; j<exceptionVect.size(); j++)
                     {
-                        condCheckFail = true;
-                        break;
-                    } else condCheckFail = false;
+                        if (RPG::Actor::partyMember(i)->conditions[exceptionVect[j]] != 0)
+                        {
+                            ATB_PARTY = 0;
+                            condCheckFail = true;
+                            break;
+                        } else condCheckFail = false;
+                    }
+                    if (condCheckFail == false) // Just check this first
+                    {
+                        if ((RPG::Actor::partyMember(i)->conditions[1] == 0 // ... the hero is not dead
+                            && RPG::Actor::partyMember(i)->actionStatus == RPG::AS_IDLE // ... the hero is idle
+                            && RPG::Actor::partyMember(i)->animationId != 14) // ... the hero has won the battle
+                            // 14 is the animation id for battle won for whatever reason-- should be 11
+                            && RPG::switches[confFreezeSwitch] == false // Other plugins need a means of freezing battle
+                            )
+                        {
+                            if (ATB_PARTY < 300000)
+                                if (confAgilMult == true)
+                                    ATB_PARTY = ATB_PARTY + ((confAddValue*RPG::Actor::partyMember(i)->getAgility())*RPG::variables[confBattlerStartVar+i]);
+                                else ATB_PARTY = ATB_PARTY + (confAddValue*RPG::variables[confBattlerStartVar+i]);
+                            else ATB_PARTY = 300000;
+                            if (ATB_PARTY < 0)
+                                ATB_PARTY = 0;
+                        }
+                    }
                 }
+
                 // Monsters
-                if (RPG::monsters[i] != NULL && condCheckFail == false
-                    && ((RPG::monsters[i]->conditions[1] == 0 // the monster is dead
-                    && RPG::monsters[i]->actionStatus == RPG::AS_IDLE)
-                    && RPG::switches[confFreezeSwitch] == false // Other plugins need a means of freezing battle
-                    ))
+                if (RPG::monsters[i])
                 {
-                    if (RPG::monsters[i]->atbValue < 300000)
-                        if (confAgilMult == true)
-                            RPG::monsters[i]->atbValue = RPG::monsters[i]->atbValue + ((confAddValue* RPG::monsters[i]->getAgility())*RPG::variables[confBattlerStartVar+4+i]);
-                        else RPG::monsters[i]->atbValue = RPG::monsters[i]->atbValue + (confAddValue*RPG::variables[confBattlerStartVar+4+i]);
-                    else RPG::monsters[i]->atbValue = 300000;
-                    if (RPG::monsters[i]->atbValue < 0)
-                        RPG::monsters[i]->atbValue = 0;
+                    for (unsigned int j=0; j<exceptionVect.size(); j++)
+                    {
+                        if (RPG::monsters[i]->conditions[exceptionVect[j]] != 0)
+                        {
+                            condCheckFail = true;
+                            break;
+                        } else condCheckFail = false;
+                    }
+                    if (condCheckFail == false) // Just check this first
+                    {
+                        if ((RPG::monsters[i]->conditions[1] == 0 // the monster is dead
+                            && RPG::monsters[i]->actionStatus == RPG::AS_IDLE)
+                            && RPG::switches[confFreezeSwitch] == false // Other plugins need a means of freezing battle
+                            )
+                        {
+                            if (ATB_MON < 300000)
+                                if (confAgilMult == true)
+                                    ATB_MON = ATB_MON + ((confAddValue* RPG::monsters[i]->getAgility())*RPG::variables[confBattlerStartVar+4+i]);
+                                else ATB_MON = ATB_MON + (confAddValue*RPG::variables[confBattlerStartVar+4+i]);
+                            else ATB_MON = 300000;
+                            if (ATB_MON < 0)
+                                ATB_MON = 0;
+                        }
+                    }
                 }
             }
         }
-    } else if (scene != RPG::SCENE_BATTLE) {
+    } else if (scene != RPG::SCENE_BATTLE && atbWait) {
         resumeAtb();
+        frameTimer = 0;
     }
 }
 
 // anytime the battle status window refreshes
 bool onBattleStatusWindowDrawn(int x, int selection, bool selActive, bool isTargetSelection, bool isVisible) {
     if (selActive == true) {
-        if (RPG::system->atbMode == RPG::ATBM_WAIT) RPG::battleSpeed = confWaitSpeed; // wait mode should stop the atb bar when heros are selecting actions
+        if (RPG::system->atbMode == RPG::ATBM_WAIT) RPG::battleSpeed = confWaitSpeed; // wait mode should stop the atb bar when heroes are selecting actions
         else RPG::battleSpeed = confActiveSpeed; // active mode should still move the atb bar by the % set in confActiveSpeed (100 is the default speed)
         atbWait = true;
     }
@@ -177,7 +186,8 @@ bool onBattleStatusWindowDrawn(int x, int selection, bool selActive, bool isTarg
     for (unsigned int j=0; j<exceptionVect.size(); j++)
     {
         if ((RPG::Actor::partyMember(selection)->conditions[1]
-            && RPG::Actor::partyMember(selection)->conditions[exceptionVect[j]]) != 0) {
+            || RPG::Actor::partyMember(selection)->conditions[exceptionVect[j]]) != 0) {
+            // Nailed it!
             RPG::Actor::partyMember(selection)->atbValue = 0;
             resumeAtb(); // resume the ATB bar
             //MessageBox(NULL, "what happen", "Debug", MB_ICONINFORMATION);
@@ -186,16 +196,9 @@ bool onBattleStatusWindowDrawn(int x, int selection, bool selActive, bool isTarg
     }
     return true;
 }
-// resume the ATB bar when the action is started
-bool onDoBattlerAction(RPG::Battler* battler) {
-    // however, make an exception if a monster is starting an action
-    if (battler->isMonster() == true) monsterAction = true;
-    return true;
-}
 
 bool onBattlerActionDone(RPG::Battler* battler, bool success) {
     resumeAtb();
-    if (monsterAction == true) monsterAction = false; // the monster has finished its action
     return true;
 }
 
@@ -203,7 +206,8 @@ bool onBattlerActionDone(RPG::Battler* battler, bool success) {
 bool onEventCommand(RPG::EventScriptLine* scriptLine, RPG::EventScriptData* scriptData,
                     int eventId, int pageId, int lineId, int* nextLineId) {
     if (eventId == 0) { // battle events
-        if (scriptData->currentLineId == 0) atbWait = true; // when an event page starts
+        if (scriptData->currentLineId == 0) // when an event page starts
+            atbWait = true;
         else if (scriptLine->command == RPG::EVCMD_END_OF_EVENT) // when an event page ends
             resumeAtb();
     }
@@ -225,12 +229,14 @@ bool onComment ( const char* text,
         for (int i=0; i<4; i++){
             RPG::variables[confBattlerStartVar+i] = RPG::variables[confHeroSpeedVarM];
         }
+        return false;
     }
     if(!cmd.compare("init_monster_speed"))
     {
         for (int i=0; i<8; i++){
             RPG::variables[confBattlerStartVar+4+i] = RPG::variables[confMonsterSpeedVarM];
         }
+        return false;
     }
     if(!cmd.compare("condition_speed_check"))
     {
@@ -240,15 +246,30 @@ bool onComment ( const char* text,
             && parsedData->parameters[2].type == RPG::PARAM_NUMBER) {
             for (int i=0; i<8; i++){
                 if (i<4){
-                    if (RPG::Actor::partyMember(i) != NULL
-                        && RPG::Actor::partyMember(i)->conditions[parsedData->parameters[0].number] != 0)
-                        RPG::variables[confBattlerStartVar+i] = parsedData->parameters[1].number;
+                    if (RPG::Actor::partyMember(i)) {
+                        if (RPG::Actor::partyMember(i)->conditions[parsedData->parameters[0].number] != 0)
+                            RPG::variables[confBattlerStartVar+i] = parsedData->parameters[1].number;
+                    }
                 }
-                if (RPG::monsters[i] != NULL
-                    && RPG::monsters[i]->conditions[parsedData->parameters[0].number] != 0)
-                    RPG::variables[confBattlerStartVar+4+i] = parsedData->parameters[2].number;
+                if (RPG::monsters[i]) {
+                    if (RPG::monsters[i]->conditions[parsedData->parameters[0].number] != 0)
+                        RPG::variables[confBattlerStartVar+4+i] = parsedData->parameters[2].number;
+                }
             }
         }
+        return false;
+    }
+    if(!cmd.compare("halt_atb"))
+    {
+        if (RPG::system->atbMode == RPG::ATBM_WAIT) RPG::battleSpeed = confWaitSpeed; // wait mode should stop the atb bar when heroes are selecting actions
+        else RPG::battleSpeed = confActiveSpeed;
+        atbWait = true;
+        return false;
+    }
+    if(!cmd.compare("resume_atb"))
+    {
+        resumeAtb();
+        return false;
     }
     return true;
 }
