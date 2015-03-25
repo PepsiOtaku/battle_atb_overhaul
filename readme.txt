@@ -21,6 +21,8 @@ While you can't technically "stop" the ATB bar using that formula, you can set t
 
 What's NEW:
 
+* v1.2: Squashed some bugs. Added the ability to halt & resume via comment command
+
 * Fixed all of the timing issues. The ATB bars no longer moves at inappropriate times.
 
 * Now has a TRUE active/wait system. In Wait mode, nobody makes a move until you've completed your action. This also prevents any skill cancelling I believe. In active mode, the ATB bar moves when an action is being taken, but at a slower rate (75%) than it does normally
