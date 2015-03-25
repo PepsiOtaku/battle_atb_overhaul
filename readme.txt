@@ -112,7 +112,7 @@ ConditionExceptions=7,8,12,13
    
 8. Set "ActiveSpeed" to a value less than or equal to 100 (100 is rm23k's default speed). This will change the overall speed
 
-10. Set "WaitSpeed" to a value other than 0 if desired.
+9. Set "WaitSpeed" to a value other than 0 if desired.
 
 10. Set ConditionExceptions to the condition IDs that are set to "No Action Allowed", separated by commas 
    (ex: CondtionException=7,8,12,13). When a party member becomes afflicted with one of these, their ATB bar will be reset 
