@@ -11,7 +11,7 @@ Base ATB Speed + (( AddValue * Agility ) * SpeedVar)
 ************************************
 
 The maximum value the ATB Speed can be is 30000, which will trigger the battler's next action. The AddValue
-is a hard-coded number you set within the DynRPG.ini file. 125 is the recommnded value, but you can 
+is a hard-coded number you set within the DynRPG.ini file. 125 is the recommended value, but you can 
 decrease/increase this value to your desired result. The SpeedVar is a multiplier that you can set via variable from within RPG Maker. 
 
 The formula gets calculated a few times a second, so if you set your AddValue to 125 & the SpeedVar to 12, while the agility is 20 (multiplying to 30000) you would get an instantaneous ATB bar (which also makes things a little easy) forcing each party member's action. The lower the AddValue, the higher your SpeedVar value needs to be. 
@@ -35,9 +35,9 @@ AddValue is set in the ini, while SpeedVar is a multiplier set in-game. Previous
 
 * You can control the ATB bar of any battler via variable. This requires 14 variables (2 for the "Master" variables, 4 heroes and 8 monsters).
 
-* You can add condition exceptions (like with Corti's plugin)
+* You can add condition exceptions
 
-* You can set Active/Wait via switch (Moved from this plugin)
+* You can set Active/Wait via switch
 
 * Comment commands: init_hero_speed, init_monster_speed, condition_speed_check
 		
