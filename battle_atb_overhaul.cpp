@@ -1,6 +1,6 @@
 // ATB Overhaul
 // by PepsiOtaku
-// Version 1.2
+// Version 1.3
 
 #include <DynRPG/DynRPG.h>
 #include <vector>
@@ -91,7 +91,7 @@ bool onSetSwitch(int id, bool value) {
 // this will reset RPG::BattleSpeed. NOTE: RPG::battleSpeed is only set to 100 (default), 0 (for Wait Mode), or 75 (for Active Mode)
 // onFrame only makes alterations to individual battler's ATB bars
 void resumeAtb(){
-    if (atbWait == true) {
+    if (atbWait) {
         RPG::battleSpeed = 100;
         atbWait = false;
     }
@@ -145,6 +145,7 @@ void onFrame (RPG::Scene scene){
                     {
                         if (RPG::monsters[i]->conditions[exceptionVect[j]] != 0)
                         {
+                            // ATB_MON = 0 // ??
                             condCheckFail = true;
                             break;
                         } else condCheckFail = false;
@@ -176,22 +177,23 @@ void onFrame (RPG::Scene scene){
 
 // anytime the battle status window refreshes
 bool onBattleStatusWindowDrawn(int x, int selection, bool selActive, bool isTargetSelection, bool isVisible) {
-    if (selActive == true) {
+    if (selActive && !atbWait) {
         if (RPG::system->atbMode == RPG::ATBM_WAIT) RPG::battleSpeed = confWaitSpeed; // wait mode should stop the atb bar when heroes are selecting actions
         else RPG::battleSpeed = confActiveSpeed; // active mode should still move the atb bar by the % set in confActiveSpeed (100 is the default speed)
         atbWait = true;
     }
 
     // if the party member dies (or has a condition with a status restriction) while the status window was open
-    for (unsigned int j=0; j<exceptionVect.size(); j++)
-    {
-        if ((RPG::Actor::partyMember(selection)->conditions[1]
-            || RPG::Actor::partyMember(selection)->conditions[exceptionVect[j]]) != 0) {
-            // Nailed it!
-            RPG::Actor::partyMember(selection)->atbValue = 0;
-            resumeAtb(); // resume the ATB bar
-            //MessageBox(NULL, "what happen", "Debug", MB_ICONINFORMATION);
-            break;
+    if ((selection >= 0 && selection < 4) && RPG::Actor::partyMember(selection)) {
+        for (unsigned int j=0; j<exceptionVect.size(); j++)
+        {
+            if ((RPG::Actor::partyMember(selection)->conditions[1]
+                || RPG::Actor::partyMember(selection)->conditions[exceptionVect[j]]) != 0) {
+                // Nailed it!
+                RPG::Actor::partyMember(selection)->atbValue = 0;
+                resumeAtb(); // resume the ATB bar
+                break;
+            }
         }
     }
     return true;
@@ -205,7 +207,7 @@ bool onBattlerActionDone(RPG::Battler* battler, bool success) {
 // do not move ATB bar when event commands are running
 bool onEventCommand(RPG::EventScriptLine* scriptLine, RPG::EventScriptData* scriptData,
                     int eventId, int pageId, int lineId, int* nextLineId) {
-    if (eventId == 0) { // battle events
+    if (RPG::system->scene == RPG::SCENE_BATTLE && eventId == 0) { // battle events
         if (scriptData->currentLineId == 0) // when an event page starts
             atbWait = true;
         else if (scriptLine->command == RPG::EVCMD_END_OF_EVENT) // when an event page ends

@@ -1,5 +1,5 @@
 ========================================================================
-ATB OVERHAUL (formerly Advanced Faster ATB 2) v1.0
+ATB OVERHAUL (formerly Advanced Faster ATB 2) v1.3
 For RPG Maker 2003 with DynRPG v0.20 or higher
 By PepsiOtaku
 ========================================================================
@@ -20,6 +20,8 @@ While you can't technically "stop" the ATB bar using that formula, you can set t
 
 
 What's NEW:
+
+* v1.3: Squashed hopefully the last bug--added more checks in the onBattleStatusWindowDrawn code. 
 
 * v1.2: Squashed some bugs. Added the ability to halt & resume via comment command
 
