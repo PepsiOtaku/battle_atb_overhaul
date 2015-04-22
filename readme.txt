@@ -82,7 +82,7 @@ DefaultMonsterSpeed=3
 ActiveSpeed=75
 WaitSpeed=0
 ; Switch that will freeze the ATB bars if turned on
-confFreezeSwitch=4048
+FreezeSwitch=4048
 ; Add condition exceptions here, separated by commas (ex: CondtionException=7,8,12,13)
 ; This will prevent the atb bar from moving while a condition has "No Action Allowed"
 ; When a party member becomes afflicted with one of these, their ATB bar will be reset to 0 (as it's frozen)
