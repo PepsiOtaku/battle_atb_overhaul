@@ -1,5 +1,5 @@
 ========================================================================
-ATB OVERHAUL (formerly Advanced Faster ATB 2) v1.3
+ATB OVERHAUL (formerly Advanced Faster ATB 2) v1.4
 For RPG Maker 2003 with DynRPG v0.20 or higher
 By PepsiOtaku
 ========================================================================
@@ -20,6 +20,9 @@ While you can't technically "stop" the ATB bar using that formula, you can set t
 
 
 What's NEW:
+
+* v1.4: More bug squashing. Timing of ATB speed in active mode should be perfect.
+	- prevented the atb bars from moving while any selection windows are open, with the exception of command and party member selections
 
 * v1.3: Squashed hopefully the last bug--added more checks in the onBattleStatusWindowDrawn code. 
 
@@ -76,10 +79,11 @@ BattlerStartVar=4041
 ; Default multiplier values
 DefaultHeroSpeed=3
 DefaultMonsterSpeed=3
-; ActiveSpeed default=75. 100 is RM2k3's default speed, so it's recommended to set less 
+; ActiveSpeed default=100. 100 is RM2k3's default speed, but if you set less, the ATB will slow down
+; while party members are available for actions
 ; Setting to 0 would always force WAIT mode.
 ; WaitSpeed default=0. Set to the same value as ActiveSpeed to force ACTIVE mode.
-ActiveSpeed=75
+ActiveSpeed=100
 WaitSpeed=0
 ; Switch that will freeze the ATB bars if turned on
 FreezeSwitch=4048
