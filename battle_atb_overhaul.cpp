@@ -1,6 +1,6 @@
 // ATB Overhaul
 // by PepsiOtaku
-// Version 1.4
+// Version 1.5
 
 #include <DynRPG/DynRPG.h>
 #include <vector>
@@ -23,6 +23,8 @@ bool atbWait;
 bool monsterAction = false;
 bool confAgilMult;
 bool condCheckFail;
+bool preventEarlyResume = false;
+bool animPlaying = false;
 int confFreezeSwitch;
 std::string condExceptionSet;
 
@@ -58,12 +60,22 @@ bool onStartup (char *pluginName) {
     token = atoi(condExceptionSet.c_str());
     exceptionVect.push_back(token);
 
+
 	return true;
 }
 
 void initializeSpeedVars(){
     if (RPG::variables[confHeroSpeedVarM] == 0) RPG::variables[confHeroSpeedVarM] = confDefaultHeroSpeed;
     if (RPG::variables[confMonsterSpeedVarM] == 0) RPG::variables[confMonsterSpeedVarM] = confDefaultMonsterSpeed;
+}
+
+// this will reset RPG::BattleSpeed. NOTE: RPG::battleSpeed is only set to 100 (default), 0 (for Wait Mode), or 75 (for Active Mode)
+// onFrame only makes alterations to individual battler's ATB bars
+void resumeAtb(){
+    if (atbWait) {
+        RPG::battleSpeed = 100;
+        atbWait = false;
+    }
 }
 
 void onNewGame(){
@@ -83,23 +95,27 @@ void onLoadGame(int id, char *data, int length) {
 
 bool onSetSwitch(int id, bool value) {
     // if ATBmodeSwitch is on, set it to active, otherwise if off, set to wait
-    if (id == confAtbModeSwitch){ // this was moved from ragnadyn since it was more appropriate here
+    if (id == confAtbModeSwitch) { // this was moved from ragnadyn since it was more appropriate here
         if (value) RPG::system->atbMode = RPG::ATBM_ACTIVE;
         else RPG::system->atbMode = RPG::ATBM_WAIT;
+    } else if (id == confFreezeSwitch) {
+        if (value) {
+            // same as @halt_atb but other plugins can call it
+            if (RPG::system->atbMode == RPG::ATBM_WAIT) RPG::battleSpeed = confWaitSpeed; // wait mode should stop the atb bar when heroes are selecting actions
+            else RPG::battleSpeed = confActiveSpeed;
+            atbWait = true;
+            preventEarlyResume = true;
+        } else {
+            // same as @resume_atb
+            preventEarlyResume = false;
+            resumeAtb();
+        }
     }
     return true;
 }
 
-// this will reset RPG::BattleSpeed. NOTE: RPG::battleSpeed is only set to 100 (default), 0 (for Wait Mode), or 75 (for Active Mode)
-// onFrame only makes alterations to individual battler's ATB bars
-void resumeAtb(){
-    if (atbWait) {
-        RPG::battleSpeed = 100;
-        atbWait = false;
-    }
-}
-
 void onFrame (RPG::Scene scene){
+
     if (scene == RPG::SCENE_BATTLE
         && !atbWait) // do not do the following if the ATB bar is set to 0 or a monster is performing an action
     {
@@ -112,10 +128,13 @@ void onFrame (RPG::Scene scene){
         if (frameTimer > 10)
         {
             frameTimer = 0;
+            animPlaying = false;
             for (int i=0; i<8; i++)
             {
+                if (RPG::monsters[i]) if (RPG::monsters[i]->animData->isAnimationPlaying) animPlaying = true;
                 // Heroes
                 if (i<4 && RPG::Actor::partyMember(i)) {
+                    if (RPG::Actor::partyMember(i)->animData->isAnimationPlaying) animPlaying = true;
                     for (unsigned int j=0; j<exceptionVect.size(); j++)
                     {
                         if (RPG::Actor::partyMember(i)->conditions[exceptionVect[j]] != 0)
@@ -128,9 +147,9 @@ void onFrame (RPG::Scene scene){
                     if (!condCheckFail) // Just check this first
                     {
                         if ((RPG::Actor::partyMember(i)->conditions[1] == 0 // ... the hero is alive
-                            //&& RPG::Actor::partyMember(i)->actionStatus == RPG::AS_IDLE // ... the hero is idle
-                            //&& RPG::Actor::partyMember(i)->animationId != 14) // ... the hero has not yet won the battle
+                            && RPG::Actor::partyMember(i)->actionStatus == RPG::AS_IDLE // ... the hero is idle
                             && RPG::battleData->battlePhase == RPG::BPHASE_BATTLE) // ... the hero has not yet won the battle
+                            && !animPlaying
                             // 14 is the animation id for battle won for whatever reason-- should be 11
                             && !RPG::switches[confFreezeSwitch] // Other plugins need a means of freezing battle
                             )
@@ -153,7 +172,6 @@ void onFrame (RPG::Scene scene){
                     {
                         if (RPG::monsters[i]->conditions[exceptionVect[j]] != 0)
                         {
-                            // ATB_MON = 0 // ??
                             condCheckFail = true;
                             break;
                         } else condCheckFail = false;
@@ -162,6 +180,7 @@ void onFrame (RPG::Scene scene){
                     {
                         if ((RPG::monsters[i]->conditions[1] == 0 // the monster is alive
                             )//&& RPG::monsters[i]->actionStatus == RPG::AS_IDLE)
+                            && !animPlaying
                             && !RPG::switches[confFreezeSwitch] // Other plugins need a means of freezing battle
                             && (!RPG::battleData->winMonTarget->choiceActive || !RPG::battleData->winPartyTarget->choiceActive
                                 || !RPG::battleData->winItem->choiceActive || !RPG::battleData->winSkill->choiceActive)
@@ -179,6 +198,7 @@ void onFrame (RPG::Scene scene){
                 }
             }
         }
+
     } else if (scene != RPG::SCENE_BATTLE && atbWait) {
         resumeAtb();
         frameTimer = 0;
@@ -187,12 +207,15 @@ void onFrame (RPG::Scene scene){
 
 // anytime the battle status window refreshes
 bool onBattleStatusWindowDrawn(int x, int selection, bool selActive, bool isTargetSelection, bool isVisible) {
+    //if (RPG::battleData->encounterCondition == RPG::BENC_TYPE_BACK_ATTACK || RPG::battleData->encounterCondition == RPG::BENC_TYPE_PINCER_ATTACK)
+    //if (RPG::battleData->currentHero) printf("turnsTaken: %i\n",RPG::battleData->currentHero->turnsTaken);
+    //printf("Speed: %i\n",RPG::battleSpeed);
     if (isTargetSelection && (RPG::battleData->winMonTarget->choiceActive || RPG::battleData->winPartyTarget->choiceActive
                               || RPG::battleData->winItem->choiceActive || RPG::battleData->winSkill->choiceActive)) {
         atbWait = true;
         RPG::battleSpeed = 0;
     } else {
-        if (RPG::battleSpeed == 0 && RPG::system->atbMode == RPG::ATBM_ACTIVE && atbWait) resumeAtb();
+        if (RPG::battleSpeed == 0 && RPG::system->atbMode == RPG::ATBM_ACTIVE && atbWait && !preventEarlyResume) resumeAtb();
     }
 
     if (selActive && !atbWait) {
@@ -305,10 +328,12 @@ bool onComment ( const char* text,
         if (RPG::system->atbMode == RPG::ATBM_WAIT) RPG::battleSpeed = confWaitSpeed; // wait mode should stop the atb bar when heroes are selecting actions
         else RPG::battleSpeed = confActiveSpeed;
         atbWait = true;
+        preventEarlyResume = true;
         return false;
     }
     if(!cmd.compare("resume_atb"))
     {
+        preventEarlyResume = false;
         resumeAtb();
         return false;
     }

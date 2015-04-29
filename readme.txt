@@ -1,5 +1,5 @@
 ========================================================================
-ATB OVERHAUL (formerly Advanced Faster ATB 2) v1.4
+ATB OVERHAUL (formerly Advanced Faster ATB 2) v1.5
 For RPG Maker 2003 with DynRPG v0.20 or higher
 By PepsiOtaku
 ========================================================================
@@ -21,7 +21,9 @@ While you can't technically "stop" the ATB bar using that formula, you can set t
 
 What's NEW:
 
-* v1.4: More bug squashing. Timing of ATB speed in active mode should be perfect.
+* v1.5: More tweaks and bug-fixes! 
+
+* v1.4: More bug squashing.
 	- prevented the atb bars from moving while any selection windows are open, with the exception of command and party member selections
 
 * v1.3: Squashed hopefully the last bug--added more checks in the onBattleStatusWindowDrawn code. 
@@ -85,7 +87,7 @@ DefaultMonsterSpeed=3
 ; WaitSpeed default=0. Set to the same value as ActiveSpeed to force ACTIVE mode.
 ActiveSpeed=100
 WaitSpeed=0
-; Switch that will freeze the ATB bars if turned on
+; Switch that will freeze the ATB bars if turned on. Same as using @halt_atb
 FreezeSwitch=4048
 ; Add condition exceptions here, separated by commas (ex: CondtionException=7,8,12,13)
 ; This will prevent the atb bar from moving while a condition has "No Action Allowed"
