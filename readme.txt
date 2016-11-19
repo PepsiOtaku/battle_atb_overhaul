@@ -31,6 +31,7 @@ Installation
 
 To install the plugin, make sure that you have patched your project with cherry's DynRPG patch which can be found here: 
 http://share.cherrytree.at/showfile-24504/dynrpg_0_31_05_26_2016.rar (Link for 0.31 - latest)
+http://www.rewking.com/dynrpg
 http://cherrytree.at/dynrpg
 
 1. Copy the "battle_atb_overhaul.dll" into the DynPlugins folder of your own project.
@@ -72,7 +73,7 @@ WaitSpeed=0
 FreezeSwitch=4048
 ; Add condition exceptions here, separated by commas (ex: CondtionException=7,8,12,13)
 ; This will prevent the ATB bar from moving while a condition has "No Action Allowed"
-ConditionExceptions=7,8,12,13
+ConditionExceptions=
 
 **********************************************
 
@@ -93,7 +94,7 @@ ConditionExceptions=7,8,12,13
 
 10. "Change MonsterSpeedMasterVar" to the Variable ID of your choice. This variable controls the Master Speed multiplier for monsters. 4015 is the default
 
-11. Change BattlerStartVar "4041" to the Variable ID of your choice. 12 variables starting from here will be used for the ATB speed multipliers of individual battlers. The first 4 will be for battlers (4041-4044) while the last 8 will be used for monsters (4045-4052)
+11. Change "BattlerStartVar" to the Variable ID of your choice. 12 variables starting from here will be used for the ATB speed multipliers of individual battlers. The first 4 will be for battlers (4041-4044) while the last 8 will be used for monsters (4045-4052)
    Example naming scheme:
        4041:DynRPG-Hero1Speed
 	   4042:DynRPG-Hero2Speed
@@ -108,7 +109,7 @@ ConditionExceptions=7,8,12,13
 	   4051:DynRPG-Monster7Speed
 	   4052:DynRPG-Monster8Speed
 
-12. Change DefaultHeroSpeed & DefaultMonsterSpeed to the default multiplier value of your choice. I use "3" but you can change this to Whichever multiplier works best for you. 
+12. Change "DefaultHeroSpeed" & "DefaultMonsterSpeed" to the default multiplier value of your choice. I use "3" but you can change this to whichever multiplier works best for you. 
    NOTE: "0" would override the whole formula, and use RM2k3's default ATB speed if you wish to do so
    EXAMPLE: Say you have a menu that has "Battle Speed" from 1-5 where 1 is slowest and 5 is fastest. Using this plugin, you can scale the battle speed to something that feels right to you for each of those settings, and use the DefaultHeroSpeed/DefaultMonsterSpeed variable in the menu itself.
    
@@ -116,7 +117,9 @@ ConditionExceptions=7,8,12,13
 
 14. Set "WaitSpeed" to a value other than 0 if desired.
 
-15. Set ConditionExceptions to the condition IDs that are set to "No Action Allowed", separated by commas (example: CondtionException=7,8,12,13). When a party member becomes afflicted with one of these, their ATB bar will be reset to 0 (as it's frozen) and will not increment whatsoever.
+15. Set "FreezeSwitch" to a Switch ID of your choice. When turned on, this will freeze the battle until the switch has been turned off again.
+
+15. Set "ConditionExceptions" to the condition IDs that are set to "No Action Allowed", separated by commas (example: CondtionException=7,8,12,13). When a party member becomes afflicted with one of these, their ATB bar will be reset to 0 (as it's frozen) and will not increment whatsoever.
 
 
 Instructions
