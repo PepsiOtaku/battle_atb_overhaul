@@ -26,30 +26,6 @@ What's NEW:
 * v1.4: More bug squashing.
 	- prevented the ATB bars from moving while any selection windows are open, with the exception of command and party member selections
 
-* v1.3: Squashed hopefully the last bug--added more checks in the onBattleStatusWindowDrawn code. 
-
-* v1.2: Squashed some bugs. Added the ability to halt & resume via comment command
-
-* Fixed all of the timing issues. The ATB bars no longer moves at inappropriate times.
-
-* Now has a TRUE active/wait system. In Wait mode, nobody makes a move until you've completed your action. This also prevents any skill canceling I believe. In active mode, the ATB bar moves when an action is being taken, but at a slower rate (75%) than it does normally
-
-* Added a character's agility into my formula, giving Agility more of an impact. You can also use turn this off and use the old formula (same thing minus agility).
-
-AddValue is set in the ini, while SpeedVar is a multiplier set in-game. Previously, the AddValue could be pretty high (2500) but now that you have to account for agility, you need to set it to an appropriate amount (I set it to 125 since my game uses agilities between around 10-30. If you set the SpeedVar to a negative variable, the ATB bar will go backwards to 0. Setting the AddValue to 1 would basically give you complete control in-game.
-
-* You can control the ATB bar of any battler via variable. This requires 14 variables (2 for the "Master" variables, 4 heroes and 8 monsters).
-
-* You can add condition exceptions
-
-* You can set Active/Wait via switch
-
-* Comment commands: init_hero_speed, init_monster_speed, condition_speed_check
-		
-* v1.0: Added "FreezeSwitch" which will freeze all actions when turned on. You MUST turn this off again when you are done.
-
-* v1.0: Added "WaitSpeed" which will set the Wait speed to a value, similar to "ActiveSpeed."
-
 Installation
 -------------
 
