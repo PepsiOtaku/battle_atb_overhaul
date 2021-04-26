@@ -1,5 +1,5 @@
 ========================================================================
-ATB OVERHAUL (formerly Advanced Faster ATB 2) v1.6
+ATB OVERHAUL (formerly Advanced Faster ATB 2) v1.7
 For RPG Maker 2003 with DynRPG v0.20 or higher
 By PepsiOtaku
 ========================================================================
@@ -18,6 +18,8 @@ While you can't technically "stop" the ATB bar using that formula, you can set t
 
 
 What's NEW:
+
+* v1.7: Fixed a bug in condition_speed_check where speed wouldn't reset when condition wore off (like a Berserk condition where speed increases)
 
 * v1.6: More bug-fixes, StartInWaitMode, OnlyShowCommandWhenFocused, FixSelectionBarHeight, new recommended AddValue & ActiveSpeed, improved this readme hopefully
 
@@ -119,7 +121,7 @@ ConditionExceptions=
 
 15. Set "FreezeSwitch" to a Switch ID of your choice. When turned on, this will freeze the battle until the switch has been turned off again.
 
-15. Set "ConditionExceptions" to the condition IDs that are set to "No Action Allowed", separated by commas (example: CondtionException=7,8,12,13). When a party member becomes afflicted with one of these, their ATB bar will be reset to 0 (as it's frozen) and will not increment whatsoever.
+16. Set "ConditionExceptions" to the condition IDs that are set to "No Action Allowed", separated by commas (example: CondtionException=7,8,12,13). When a party member becomes afflicted with one of these, their ATB bar will be reset to 0 (as it's frozen) and will not increment whatsoever.
 
 
 Instructions
